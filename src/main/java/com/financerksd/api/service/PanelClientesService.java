@@ -70,8 +70,7 @@ public class PanelClientesService {
         // Una consulta por tabla, indexadas por id de cliente.
         Map<Integer, PlanMejora> planActivo = new HashMap<>();
         for (PlanMejora p : planes.findByEstado(EstadoPlan.ACTIVO)) {
-            planActivo.merge(p.getCliente().getIdUsuario(), p,
-                    (a, b) -> a.getPeriodoInicio().isAfter(b.getPeriodoInicio()) ? a : b);
+            planActivo.merge(p.getCliente().getIdUsuario(), p, (a, b) -> esMasReciente(a, b) ? a : b);
         }
         Map<Integer, LocalDate> ultimoDiag = new HashMap<>();
         for (Object[] f : diagnosticos.ultimaFechaPorCliente()) {
@@ -112,6 +111,15 @@ public class PanelClientesService {
         int hasta = (int) Math.min((long) desde + tamano, total);
         int totalPaginas = (int) ((total + tamano - 1) / tamano);
         return new PanelResponse(resumen, filtradas.subList(desde, hasta), pagina, tamano, total, totalPaginas);
+    }
+
+    /** Compara por mes del plan. Tolera periodoInicio nulo (plan viejo si la migracion de datos no corrio). */
+    private static boolean esMasReciente(PlanMejora a, PlanMejora b) {
+        LocalDate x = a.getPeriodoInicio();
+        LocalDate y = b.getPeriodoInicio();
+        if (x == null) return false;
+        if (y == null) return true;
+        return x.isAfter(y);
     }
 
     private ClientePanel fila(Cliente c, PlanMejora plan, LocalDate ultimoDiagnostico, long cantidadNotas, LocalDate hoy) {
