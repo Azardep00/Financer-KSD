@@ -9,6 +9,7 @@ import com.financerksd.api.dto.ProgresoResponse;
 import com.financerksd.api.dto.ProgresoResponse.PuntoHistorico;
 import com.financerksd.api.dto.ProgresoResponse.Variacion;
 import com.financerksd.api.model.DiagnosticoFinanciero;
+import com.financerksd.api.model.EstadoPlan;
 import com.financerksd.api.model.PlanMejora;
 import com.financerksd.api.repository.PlanMejoraRepository;
 
@@ -34,7 +35,8 @@ public class ProgresoService {
                 ? Variacion.entre(historial.get(0), historial.get(historial.size() - 1))
                 : null;
 
-        PlanMejora plan = planes.findFirstByCliente_IdUsuarioOrderByFechaCreacionDescIdPlanDesc(idCliente).orElse(null);
+        PlanMejora plan = planes.findFirstByCliente_IdUsuarioAndEstadoOrderByPeriodoInicioDescIdPlanDesc(idCliente, EstadoPlan.ACTIVO)
+                .or(() -> planes.findFirstByCliente_IdUsuarioOrderByFechaCreacionDescIdPlanDesc(idCliente)).orElse(null);
         int total = plan == null ? 0 : plan.getMetas().size();
         int hechas = plan == null ? 0 : (int) plan.getMetas().stream().filter(m -> m.isCompletada()).count();
         double progreso = plan == null ? 0 : plan.getProgreso();

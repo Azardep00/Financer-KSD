@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.financerksd.api.exception.RecursoNoEncontradoException;
 import com.financerksd.api.model.Asesor;
 import com.financerksd.api.model.Cliente;
+import com.financerksd.api.model.EstadoCliente;
 import com.financerksd.api.repository.AsesorRepository;
 import com.financerksd.api.repository.ClienteRepository;
 
@@ -37,6 +38,20 @@ public class ClienteService {
         Asesor a = asesores.findById(idAsesor)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Asesor no encontrado."));
         c.setAsesorAsignado(a);
+        return clientes.save(c);
+    }
+
+    /** Si el cliente aun no tiene asesor, queda con este. Si ya tiene uno, no cambia nada. */
+    @Transactional
+    public void asignarSiNoTiene(int idCliente, int idAsesor) {
+        Cliente c = buscar(idCliente);
+        if (c.getAsesorAsignado() == null) asignarAsesor(idCliente, idAsesor);
+    }
+
+    @Transactional
+    public Cliente cambiarEstado(int idCliente, EstadoCliente estado) {
+        Cliente c = buscar(idCliente);
+        c.setEstadoCliente(estado);
         return clientes.save(c);
     }
 }

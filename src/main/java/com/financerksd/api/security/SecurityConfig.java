@@ -47,11 +47,17 @@ public class SecurityConfig {
                 // Solo asesores.
                 .requestMatchers(HttpMethod.POST, "/api/usuarios/asesores").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.GET, "/api/clientes").hasRole("ASESOR")
+                .requestMatchers(HttpMethod.GET, "/api/clientes/panel").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.PATCH, "/api/clientes/*/asesor").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.POST, "/api/clientes/*/diagnosticos").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.POST, "/api/clientes/*/planes").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.PUT, "/api/planes/*").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.POST, "/api/planes/*/metas").hasRole("ASESOR")
+                .requestMatchers(HttpMethod.POST, "/api/planes/*/cerrar").hasRole("ASESOR")
+                .requestMatchers(HttpMethod.POST, "/api/planes/*/cancelar").hasRole("ASESOR")
+                .requestMatchers(HttpMethod.PATCH, "/api/clientes/*/estado").hasRole("ASESOR")
+                .requestMatchers("/api/clientes/*/notas").hasRole("ASESOR")   // notas privadas: el cliente NO las ve
+                .requestMatchers(HttpMethod.DELETE, "/api/notas/*").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.PUT, "/api/metas/*").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.DELETE, "/api/metas/*").hasRole("ASESOR")
 

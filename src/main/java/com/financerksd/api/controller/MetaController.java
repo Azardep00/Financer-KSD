@@ -25,13 +25,15 @@ public class MetaController {
 
     /** Asesor: edita descripcion / fecha limite. */
     @PutMapping("/{id}")
-    public MetaFinanciera editar(@PathVariable int id, @Valid @RequestBody MetaRequest req) {
+    public MetaFinanciera editar(@PathVariable int id, @Valid @RequestBody MetaRequest req, Authentication auth) {
+        autorizacion.exigirAsesorResponsable(auth, service.idClienteDeMeta(id));
         return service.editarMeta(id, req);
     }
 
     /** Asesor: elimina la meta. */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable int id) {
+    public ResponseEntity<Void> eliminar(@PathVariable int id, Authentication auth) {
+        autorizacion.exigirAsesorResponsable(auth, service.idClienteDeMeta(id));
         service.eliminarMeta(id);
         return ResponseEntity.noContent().build();
     }
@@ -39,14 +41,14 @@ public class MetaController {
     /** Cliente (dueño) o asesor: marca la meta como cumplida. */
     @PatchMapping("/{id}/completar")
     public MetaFinanciera completar(@PathVariable int id, Authentication auth) {
-        autorizacion.exigirAccesoACliente(auth, service.idClienteDeMeta(id));
+        autorizacion.exigirEscritura(auth, service.idClienteDeMeta(id));
         return service.cambiarEstadoMeta(id, true);
     }
 
     /** Cliente (dueño) o asesor: devuelve la meta a pendiente. */
     @PatchMapping("/{id}/pendiente")
     public MetaFinanciera pendiente(@PathVariable int id, Authentication auth) {
-        autorizacion.exigirAccesoACliente(auth, service.idClienteDeMeta(id));
+        autorizacion.exigirEscritura(auth, service.idClienteDeMeta(id));
         return service.cambiarEstadoMeta(id, false);
     }
 }
