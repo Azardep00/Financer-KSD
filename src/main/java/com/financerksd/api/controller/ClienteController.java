@@ -51,15 +51,27 @@ public class ClienteController {
     }
 
     @PatchMapping("/{id}/asesor")
-    public Cliente asignarAsesor(@PathVariable int id, @Valid @RequestBody AsignarAsesorRequest req) {
+    public Cliente asignarAsesor(@PathVariable int id, @Valid @RequestBody AsignarAsesorRequest req, Authentication auth) {
+        // Solo el asesor actual del cliente puede traspasarlo (o cualquiera si aun no tiene).
+        autorizacion.exigirAsesorResponsable(auth, id);
         return clienteService.asignarAsesor(id, req.idAsesor());
+    }
+
+    /** Asesor responsable: PROSPECTO / ACTIVO / PAUSADO / FINALIZADO. */
+    @PatchMapping("/{id}/estado")
+    public Cliente cambiarEstado(@PathVariable int id, @Valid @RequestBody CambiarEstadoClienteRequest req, Authentication auth) {
+        autorizacion.exigirAsesorResponsable(auth, id);
+        return clienteService.cambiarEstado(id, req.estado());
     }
 
     // ---------- Diagnosticos ----------
 
     @PostMapping("/{id}/diagnosticos")
     public ResponseEntity<DiagnosticoFinanciero> crearDiagnostico(
-            @PathVariable int id, @Valid @RequestBody DiagnosticoRequest req) {
+            @PathVariable int id, @Valid @RequestBody DiagnosticoRequest req, Authentication auth) {
+        autorizacion.exigirAsesorResponsable(auth, id);
+        // Si el cliente aun no tenia asesor, queda con el que le hace el diagnostico.
+        clienteService.asignarSiNoTiene(id, autorizacion.idActual(auth));
         return ResponseEntity.status(HttpStatus.CREATED).body(diagnosticoService.crear(id, req));
     }
 
@@ -80,6 +92,7 @@ public class ClienteController {
     @PostMapping("/{id}/planes")
     public ResponseEntity<PlanMejora> crearPlan(
             @PathVariable int id, @Valid @RequestBody PlanRequest req, Authentication auth) {
+        autorizacion.exigirAsesorResponsable(auth, id);
         PlanMejora plan = planService.crear(id, autorizacion.idActual(auth), req);
         return ResponseEntity.status(HttpStatus.CREATED).body(plan);
     }
