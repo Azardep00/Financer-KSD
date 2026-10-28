@@ -46,6 +46,7 @@ public class SecurityConfig {
 
                 // Solo asesores.
                 .requestMatchers(HttpMethod.POST, "/api/usuarios/asesores").hasRole("ASESOR")
+                .requestMatchers(HttpMethod.GET, "/api/asesores").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.GET, "/api/clientes").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.GET, "/api/clientes/panel").hasRole("ASESOR")
                 .requestMatchers(HttpMethod.PATCH, "/api/clientes/*/asesor").hasRole("ASESOR")
